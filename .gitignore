@@ -1,0 +1,13 @@
+# # Ignore all
+# *
+
+# # Unignore all with extensions
+# !*.*
+
+# # Unignore all dirs
+# !*/
+
+
+PROJ_CUDA/cuda 
+PROJ_CUDA/sample 
+PROJ_OMP/openmp
