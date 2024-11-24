@@ -6,8 +6,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/openmp",
             "args": [
-                "10",
-                "10"
+                "100",
+                "100"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
