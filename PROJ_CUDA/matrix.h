@@ -1,10 +1,10 @@
 #ifndef __MATRIX_H__
 #define __MATRIX_H__
-struct Matrix {
-  float** mat;
+typedef struct Matrix {
   int width;
   int height;
-};
+  float* mat;
+} Matrix;
 
 struct Matrix* CreateMatrix(int width,int height);
 void FreeMatrix(struct Matrix* matrix);

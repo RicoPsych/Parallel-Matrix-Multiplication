@@ -29,7 +29,6 @@ void parseArgs(Args* aptr, int* argc, char** argv)
   return;
 }
 
-__host__
 void ins__printtime(struct timeval *start, struct timeval *stop, char *marker) {
 
   long time=1000000*(stop->tv_sec-start->tv_sec)+stop->tv_usec-start->tv_usec;
