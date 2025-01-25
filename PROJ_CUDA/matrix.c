@@ -46,7 +46,7 @@ struct Matrix* TransposeMatrix(struct Matrix* matrix){
 
 int CompareMatrix(struct Matrix* m1,struct Matrix* m2){
   if((m1->height != m2->height) || (m1->width != m2->width)){
-    printf("%i,%i , %i,%i\n",m1->height, m2->height, m1->width, m2->width);
+    printf("%i,%i vs %i,%i - sizes do not match\n",m1->height, m2->height, m1->width, m2->width);
     return 0;
   }
 
@@ -60,6 +60,39 @@ int CompareMatrix(struct Matrix* m1,struct Matrix* m2){
   return 1;
 }
 
+int CompareMatrixFindidx(struct Matrix* m1,struct Matrix* m2){
+  if((m1->height != m2->height) || (m1->width != m2->width)){
+    printf("%i,%i vs %i,%i - sizes do not match\n",m1->height, m2->height, m1->width, m2->width);
+    return -2;
+  }
+
+  for(int i = 0; i < m1->height; i++){
+    for(int j = 0; j < m1->width; j++){
+      if(m1->mat[i * m1->width + j] != m2->mat[i * m2->width + j]){
+        return i * m1->width + j;
+      }
+    }
+  }
+  return -1;
+}
+
+int CompareMatrixFindidxAll(struct Matrix* m1,struct Matrix* m2, int start){
+  if((m1->height != m2->height) || (m1->width != m2->width)){
+    printf("%i,%i vs %i,%i - sizes do not match\n",m1->height, m2->height, m1->width, m2->width);
+    return -2;
+  }
+
+
+  for(int id = start; id < m1->height*m1->width; id++){
+      if(m1->mat[id] != m2->mat[id]){
+          printf("%f != %f at %d\n", m1->mat[id],m2->mat[id],id);
+          return CompareMatrixFindidxAll(m1,m2,id+1);
+      }
+    }
+  return -1;
+}
+
+
 
 void PrintMatrix(struct Matrix* matrix){
   for(int j = 0; j < matrix->width; j++){
@@ -70,6 +103,31 @@ void PrintMatrix(struct Matrix* matrix){
       printf("%i\t",i);
       for(int j = 0; j < matrix->width; j++){
         printf("%f\t",matrix->mat[i * matrix->width+j]);
+      }
+      printf("\n");
+  }
+  printf("\n");
+}
+
+
+void PrintMatrixPart(struct Matrix* matrix){
+  int w = 10;
+  int h = 10;
+  if (matrix->height< h && matrix->width<w){
+    PrintMatrix(matrix);
+    return;
+  }
+
+  int wStride = matrix->width/w;
+  int hStride = matrix->height/h;
+  for(int j = 0; j < w; j++){
+    printf("\t%i\t",j);
+  }  
+  printf("\n");
+  for(int i = 0; i < h; i++){
+      printf("%i\t",i);
+      for(int j = 0; j < w; j++){
+        printf("%f\t",matrix->mat[i * matrix->width*hStride+j*wStride]);
       }
       printf("\n");
   }
