@@ -80,7 +80,7 @@ void KernelMultiplyMatrixBasic(Matrix dm1, Matrix dm2, Matrix dm3){
 }
 
 __host__
-struct Matrix* GpuMultiplyMatrixBasic( Matrix* m1, Matrix* m2 ){
+struct Matrix* GpuMultiplyMatrixBasic( Matrix* m1, Matrix* m2 ,long* time){
   struct Matrix* m3 = CreateMatrix(m1->height,m2->width);
 
   struct Matrix* dm1 = GpuAllocateMatrix(m1);
@@ -106,7 +106,7 @@ struct Matrix* GpuMultiplyMatrixBasic( Matrix* m1, Matrix* m2 ){
   
   gettimeofday(&ins__tstop, NULL);
   ins__printtime(&ins__tstart, &ins__tstop, "Unoptimized");
-
+  *time = get_time(&ins__tstart, &ins__tstop); 
   // printf("Finished Kernel\n");
 
   GpuCopyMatrix(m3, dm3, cudaMemcpyDeviceToHost);
@@ -136,7 +136,7 @@ void KernelMultiplyMatrix2(Matrix dm1, Matrix tdm2, Matrix dm3){
 }
 
 __host__
-struct Matrix* GpuMultiplyMatrix2( Matrix* m1, Matrix* m2 ){
+struct Matrix* GpuMultiplyMatrix2( Matrix* m1, Matrix* m2 , long* time){
   struct Matrix* tm2 = TransposeMatrix(m2);
   struct Matrix* m3 = CreateMatrix(m1->height,m2->width);
 
@@ -163,7 +163,7 @@ struct Matrix* GpuMultiplyMatrix2( Matrix* m1, Matrix* m2 ){
   
   gettimeofday(&ins__tstop, NULL);
   ins__printtime(&ins__tstart, &ins__tstop, "Opt1");
-
+  *time = get_time(&ins__tstart, &ins__tstop); 
   // printf("Finished Kernel\n");
 
   GpuCopyMatrix(m3, dm3, cudaMemcpyDeviceToHost);
@@ -246,7 +246,7 @@ void KernelMultiplyTiles(Matrix dm1, Matrix tdm2, Matrix dm3){
 
 
 __host__
-struct Matrix* GpuMultiplyMatrixTiles( Matrix* m1, Matrix* m2 ){
+struct Matrix* GpuMultiplyMatrixTiles( Matrix* m1, Matrix* m2 , long* time){
   struct Matrix* tm2 = TransposeMatrix(m2);
   struct Matrix* m3 = CreateMatrix(m1->height,m2->width);
 
@@ -276,7 +276,7 @@ struct Matrix* GpuMultiplyMatrixTiles( Matrix* m1, Matrix* m2 ){
   
   gettimeofday(&ins__tstop, NULL);
   ins__printtime(&ins__tstart, &ins__tstop, "Tiles");
-
+  *time = get_time(&ins__tstart, &ins__tstop); 
   // printf("Finished Kernel\n");
 
   GpuCopyMatrix(m3, dm3, cudaMemcpyDeviceToHost);
@@ -315,27 +315,55 @@ int main(int argc,char **argv) {
 
   struct Matrix* m1 = CreateMatrix(h,w);
   struct Matrix* m2 = CreateMatrix(w,h);
-
+  struct Matrix* m3;
+  struct Matrix* m5;
   FillMatrix(m1);
   FillMatrix(m2);
   // PrintMatrix(m1);
   // PrintMatrix(m2);
 
-  struct Matrix* m3 = GpuMultiplyMatrixBasic(m1, m2);
-  // struct Matrix* m4 = GpuMultiplyMatrix2(m1,m2);
-  struct Matrix* m5 = GpuMultiplyMatrixTiles(m1,m2);
-  // PrintMatrix(m3);
-  // PrintMatrix(m4);
-  // PrintMatrix(m5);
-  // PrintMatrixPart(m5);
-  // PrintMatrixPart(m3);
+  long minT1 = __INT32_MAX__;
+  long avgT1 = 0;
+  long maxT1 = 0;
 
+  long minT3 = __INT32_MAX__;
+  long avgT3 = 0;
+  long maxT3 = 0;
+
+  for(int i = 0;i<10;i++){
+    long time1 = 0;
+    long time3 = 0;
+    m3 = GpuMultiplyMatrixBasic(m1, m2, &time1);
+    // struct Matrix* m4 = GpuMultiplyMatrix2(m1,m2);
+    m5 = GpuMultiplyMatrixTiles(m1,m2, &time3);
+    // PrintMatrix(m3);
+    // PrintMatrix(m4);
+    // PrintMatrix(m5);
+    // PrintMatrixPart(m5);
+    // PrintMatrixPart(m3);
+    printf("%d\n",CompareMatrix(m5,m3));
   // CompareMatrixFindidxAll(m4, m5,0);
-  
   // printf("%d\n",CompareMatrix(m4,m3));
-  printf("%d\n",CompareMatrix(m5,m3));
   // printf("%d\n",CompareMatrix(m5,m4));
+    
 
+    avgT3+=time3;
+    if(time3 > maxT3) maxT3 = time3;
+    if(time3 < minT3) minT3 = time3;
+
+
+    avgT1+=time1;
+    if(time1 > maxT1) maxT1 = time1;
+    if(time1 < minT1) minT1 = time1;
+
+  }
+  avgT1/=10;
+  avgT3/=10;
+  long uncT1 = (maxT1 - minT1)/2;
+  long uncT3 = (maxT3 - minT3)/2;
+
+  printf("T1 mean: %ld microseconds, uncertainty: %ld\n",avgT1,uncT1);
+  printf("T3 mean: %ld microseconds, uncertainty: %ld\n",avgT3,uncT3);
 
   FreeMatrix(m1);
   FreeMatrix(m2);

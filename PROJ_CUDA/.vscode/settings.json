@@ -1,6 +1,8 @@
 {
     "files.associations": {
+        "*.module": "php",
         "utility.h": "c",
-        "matrix.c": "cpp"
+        "matrix.c": "cpp",
+        "__locale": "cpp"
     }
 }

@@ -37,4 +37,8 @@ void ins__printtime(struct timeval *start, struct timeval *stop, char *marker) {
   return;
 }
 
+long get_time(struct timeval *start, struct timeval *stop) {
+  return 1000000*(stop->tv_sec-start->tv_sec)+stop->tv_usec-start->tv_usec;
+}
+
 #endif
